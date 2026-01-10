@@ -36,4 +36,59 @@ function playVideo() {
       }
     }, index * 800);
   });
+
+  // Save daily data
+function saveToHistory(text) {
+  const today = new Date().toLocaleDateString();
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+
+  history.push({
+    date: today,
+    data: text
+  });
+
+  localStorage.setItem("history", JSON.stringify(history));
 }
+
+// Show history with per-entry delete
+function showHistory() {
+  const historyDiv = document.getElementById("history");
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+
+  if (history.length === 0) {
+    historyDiv.innerHTML = "<p>No history found</p>";
+  } else {
+    historyDiv.innerHTML = "<h3>📅 Daily History</h3>";
+
+    // Reverse for latest first
+    history.slice().reverse().forEach((entry, index) => {
+      historyDiv.innerHTML += `
+        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; position:relative;">
+          <b>${entry.date}</b>
+          <pre>${entry.data}</pre>
+          <button class="delete-entry-btn" onclick="deleteEntry(${history.length - 1 - index})">Delete</button>
+        </div>
+      `;
+    });
+  }
+
+  historyDiv.style.display = "block";
+}
+
+// Delete single entry
+function deleteEntry(index) {
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  history.splice(index, 1);
+  localStorage.setItem("history", JSON.stringify(history));
+  showHistory(); // refresh
+}
+
+// Delete all history
+function deleteAllHistory() {
+  if (confirm("Delete all history? This cannot be undone.")) {
+    localStorage.removeItem("history");
+    document.getElementById("history").innerHTML = "<p>All history deleted.</p>";
+  }
+}
+      }
+
