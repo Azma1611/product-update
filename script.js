@@ -1,156 +1,137 @@
-/* General Body */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
+// ELEMENTS
+const playBtn = document.getElementById("playBtn");
+const historyBtn = document.getElementById("historyBtn");
+const animationBox = document.getElementById("animation");
+const historyDiv = document.getElementById("history");
+
+// PLAY BUTTON CLICK
+playBtn.addEventListener("click", () => {
+  const text = document.getElementById("input").value.trim();
+  if (!text) return alert("Please paste data first.");
+
+  saveToHistory(text);
+  playAnimation(text);
+});
+
+// VIEW HISTORY BUTTON CLICK
+historyBtn.addEventListener("click", showHistory);
+
+// ANIMATION FUNCTION
+function playAnimation(text) {
+  animationBox.innerHTML = "";
+  const lines = text.split("\n");
+
+  lines.forEach((line, index) => {
+    setTimeout(() => {
+      const parts = line.split(",");
+      if (parts.length === 3) {
+        const item = parts[0].trim();
+        const oldVal = Number(parts[1]);
+        const newVal = Number(parts[2]);
+
+        let status = "➖";
+        let cls = "";
+
+        if (newVal > oldVal) {
+          status = "🔼 Increase";
+          cls = "up";
+        } else if (newVal < oldVal) {
+          status = "🔽 Decrease";
+          cls = "down";
+        }
+
+        const div = document.createElement("div");
+        div.className = "item-box animate-row";
+        div.innerHTML = `
+          <div class="item-data">
+            <span><b>Item:</b> ${item}</span>
+            <span><b>Old:</b> ${oldVal}</span>
+            <span><b>New:</b> ${newVal}</span>
+            <span class="${cls}"><b>Status:</b> ${status}</span>
+          </div>
+          <div class="menu">
+            <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+            <div class="menu-content">
+              <button onclick="deleteEntry('${item}')">Delete</button>
+              <button onclick="deleteAllHistory()">Delete All History</button>
+            </div>
+          </div>
+        `;
+        animationBox.appendChild(div);
+      }
+    }, index * 800);
+  });
 }
 
-.app {
-  max-width: 480px;
-  margin: auto;
-  padding: 15px;
-  min-height: 100vh;
-  background: white;
+// MENU TOGGLE
+function toggleMenu(element) {
+  const menu = element.nextElementSibling;
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-/* Headings */
-h2 {
-  text-align: center;
-  margin-bottom: 10px;
+// SAVE TO LOCALSTORAGE
+function saveToHistory(text) {
+  const today = new Date().toLocaleDateString();
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  history.push({ date: today, data: text });
+  localStorage.setItem("history", JSON.stringify(history));
 }
 
-/* Textarea */
-textarea {
-  width: 100%;
-  height: 100px;
-  font-size: 16px;
-  padding: 10px;
-  margin-bottom: 10px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+// SHOW HISTORY
+function showHistory() {
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  historyDiv.innerHTML = "";
+
+  if (history.length === 0) {
+    historyDiv.innerHTML = "<p>No history found.</p>";
+    return;
+  }
+
+  historyDiv.innerHTML = "<h3>📅 Daily History</h3>";
+
+  history.slice().reverse().forEach((entry, index) => {
+    historyDiv.innerHTML += `
+      <div class="item-box">
+        <div class="item-data">
+          <span><b>Date:</b> ${entry.date}</span>
+          <pre>${entry.data}</pre>
+        </div>
+        <div class="menu">
+          <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+          <div class="menu-content">
+            <button onclick="deleteHistoryEntry(${history.length - 1 - index})">Delete</button>
+            <button onclick="deleteAllHistory()">Delete All History</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
 }
 
-/* Buttons */
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
+// DELETE SINGLE HISTORY ENTRY
+function deleteHistoryEntry(index) {
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  history.splice(index, 1);
+  localStorage.setItem("history", JSON.stringify(history));
+  showHistory();
 }
 
-button:active {
-  transform: scale(0.98);
+// DELETE ALL HISTORY
+function deleteAllHistory() {
+  if (confirm("Delete all history? This cannot be undone.")) {
+    localStorage.removeItem("history");
+    historyDiv.innerHTML = "<p>All history deleted.</p>";
+    animationBox.innerHTML = "";
+  }
 }
 
-.view-history-btn {
-  background: #007bff;
-  color: white;
-}
-
-.delete-btn {
-  background: #e53935;
-  color: white;
-}
-
-/* Animation Box */
-.animation-box {
-  min-height: 120px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  padding: 10px;
-  background: #fdfdfd;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-/* History Section */
-.history-box {
-  margin-top: 10px;
-}
-
-/* Item Box */
-.item-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: relative;
-}
-
-/* Item Data */
-.item-data {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.item-data span {
-  margin: 2px 0;
-}
-
-/* Status Colors */
-.up {
-  color: green;
-  font-weight: bold;
-}
-.down {
-  color: red;
-  font-weight: bold;
-}
-
-/* 3-Dot Menu */
-.menu {
-  position: relative;
-}
-
-.menu-btn {
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0 10px;
-  user-select: none;
-}
-
-.menu-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 28px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  min-width: 120px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  z-index: 10;
-}
-
-.menu-content button {
-  width: 100%;
-  padding: 8px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-}
-
-.menu-content button:hover {
-  background: #f2f2f2;
-}
-
-/* Animation */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-row {
-  animation: fadeInUp 0.6s ease forwards;
+// DELETE ENTRY FROM ANIMATION
+function deleteEntry(itemName) {
+  const boxes = animationBox.getElementsByClassName("item-box");
+  for (let box of boxes) {
+    if (box.querySelector(".item-data span").textContent.includes(itemName)) {
+      box.remove();
+      break;
+    }
+  }
 }
