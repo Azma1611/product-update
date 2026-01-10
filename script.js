@@ -1,39 +1,83 @@
-function playVideo() {
-  const text = document.getElementById("input").value.trim();
-  const lines = text.split("\n");
-  const tbody = document.getElementById("result");
+body {
+  margin: 0;
+  background: #f2f2f2;
+  font-family: Arial, sans-serif;
+}
 
-  tbody.innerHTML = ""; // clear old data
+.app {
+  max-width: 420px;
+  margin: auto;
+  padding: 15px;
+  background: white;
+  min-height: 100vh;
+}
 
-  lines.forEach((line, index) => {
-    setTimeout(() => {
-      const parts = line.split(",");
-      if (parts.length === 3) {
-        const item = parts[0];
-        const oldVal = Number(parts[1]);
-        const newVal = Number(parts[2]);
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
 
-        let status = "➖";
-        let cls = "";
+textarea {
+  width: 100%;
+  height: 120px;
+  font-size: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+}
 
-        if (newVal > oldVal) {
-          status = "🔼 Increase";
-          cls = "up";
-        } else if (newVal < oldVal) {
-          status = "🔽 Decrease";
-          cls = "down";
-        }
+button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin: 12px 0;
+  cursor: pointer;
+}
 
-        const row = document.createElement("tr");
-        row.className = "row";
-        row.innerHTML = `
-          <td>${item}</td>
-          <td>${oldVal}</td>
-          <td>${newVal}</td>
-          <td class="${cls}">${status}</td>
-        `;
-        tbody.appendChild(row);
-      }
-    }, index * 800); // delay = video effect
-  });
+button:active {
+  transform: scale(0.98);
+}
+
+.table-box {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.up {
+  color: green;
+  font-weight: bold;
+}
+
+.down {
+  color: red;
+  font-weight: bold;
+}
+
+.row {
+  animation: slideUp 0.6s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
