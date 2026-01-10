@@ -75,4 +75,28 @@ function showHistory() {
   }
 
   historyDiv.style.display = "block";
+
+  .delete-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  background: #e53935;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
 }
+
+.delete-entry-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  float: right;
+}
+}
+
