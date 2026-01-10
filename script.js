@@ -3,33 +3,45 @@ const historyBtn = document.getElementById("historyBtn");
 const animationBox = document.getElementById("animation");
 const historyDiv = document.getElementById("history");
 
-// Parse pasted WhatsApp data
+// Parse raw WhatsApp data while preserving order
 function parseData(text){
   let lines = text.split(/\n/).map(l=>l.trim()).filter(l=>l);
-  let data = [], market="", date="";
+  let data=[], market="", date="";
   lines.forEach(line=>{
-    if(line.match(/^\d{2}[._]\d{2}[._]?\d{4}$/)){date=line;} // date line
-    else if(!line.includes(":")){market=line;} // market line
-    else{
+    if(line.match(/^\d{2}[._]\d{2}[._]?\d{4}$/)){
+      date=line;
+    } else if(!line.includes(":")){
+      market=line;
+    } else {
       let parts=line.split(":");
-      let item=parts[0].trim();
-      let prices=parts[1].split("-").map(p=>Number(p.replace(/\D/g,"")));
+      if(parts.length<2) return;
+      let item = parts[0].replace(/[^A-Za-z]/g,"").trim();
+      let prices = parts[1].split("-").map(p=>Number(p.replace(/\D/g,"")));
       if(prices.length===2){
         data.push({market,date,item,old:prices[0],new:prices[1]});
       }
     }
   });
-  return data;
+  return data; // keep the order as in client paste
 }
 
-// Display animated items
-function displayAnimation(data){
-  animationBox.innerHTML = "";
+// Compare with previous batch
+function getStatus(entry,prevBatch){
+  if(!prevBatch || prevBatch.length===0) return entry.new>entry.old?"🔼 Increase":(entry.new<entry.old?"🔽 Decrease":"➖");
+  const match = prevBatch.find(e=>e.market===entry.market && e.item===entry.item);
+  if(!match) return entry.new>entry.old?"🔼 Increase":(entry.new<entry.old?"🔽 Decrease":"➖");
+  if(entry.new>match.new) return "🔼 Increase";
+  if(entry.new<match.new) return "🔽 Decrease";
+  return "➖";
+}
+
+// Display animation
+function displayAnimation(data,prevBatch=null){
+  animationBox.innerHTML="";
   data.forEach((entry,index)=>{
     setTimeout(()=>{
-      let status="➖", cls="";
-      if(entry.new > entry.old){status="🔼 Increase"; cls="up";}
-      else if(entry.new < entry.old){status="🔽 Decrease"; cls="down";}
+      const status = getStatus(entry,prevBatch);
+      let cls = status.includes("Increase")?"up":(status.includes("Decrease")?"down":"");
       const div = document.createElement("div");
       div.className="item-box animate-row";
       div.innerHTML = `
@@ -50,14 +62,14 @@ function displayAnimation(data){
         </div>
       `;
       animationBox.appendChild(div);
-    }, index*700);
+    }, index*500);
   });
 }
 
-// Menu toggle
-function toggleMenu(elem){
-  const menu = elem.nextElementSibling;
-  menu.style.display = (menu.style.display==="block")?"none":"block";
+// Toggle menu
+function toggleMenu(elem){ 
+  const menu = elem.nextElementSibling; 
+  menu.style.display = (menu.style.display==="block")?"none":"block"; 
 }
 
 // Delete item
@@ -71,18 +83,19 @@ function deleteEntry(market,item,date){
   }
 }
 
-// History
+// Save batch to history
 function saveHistory(data){
   let history = JSON.parse(localStorage.getItem("history"))||[];
   history.push(data);
-  localStorage.setItem("history", JSON.stringify(history));
+  localStorage.setItem("history",JSON.stringify(history));
 }
 
+// Show history
 function showHistory(){
   let history = JSON.parse(localStorage.getItem("history"))||[];
-  historyDiv.innerHTML = "";
+  historyDiv.innerHTML="";
   if(history.length===0){historyDiv.innerHTML="<p>No history found.</p>"; return;}
-  historyDiv.innerHTML="<h3>📅 Daily History</h3>";
+  historyDiv.innerHTML="<h3>📅 History</h3>";
   history.slice().reverse().forEach((arr,idx)=>{
     arr.forEach(entry=>{
       const div=document.createElement("div");
@@ -108,7 +121,7 @@ function showHistory(){
   });
 }
 
-// Delete history entry
+// Delete single history batch
 function deleteHistoryEntry(idx){
   let history = JSON.parse(localStorage.getItem("history"))||[];
   history.splice(idx,1);
@@ -125,16 +138,17 @@ function deleteAllHistory(){
   }
 }
 
-// Play button
+// Play button click
 playBtn.addEventListener("click",()=>{
   const text = document.getElementById("input").value.trim();
   if(!text){alert("Paste WhatsApp data!"); return;}
   let parsed = parseData(text);
-  if(parsed.length>0){
-    displayAnimation(parsed);
-    saveHistory(parsed);
-  } else { alert("No valid data found!"); }
+  if(parsed.length===0){alert("No valid data found!"); return;}
+  let history = JSON.parse(localStorage.getItem("history"))||[];
+  let prevBatch = history.length>0 ? history[history.length-1] : null;
+  displayAnimation(parsed, prevBatch);
+  saveHistory(parsed);
 });
 
-// History button
+// History button click
 historyBtn.addEventListener("click", showHistory);
