@@ -3,32 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Animated Comparison App</title>
-  <link rel="stylesheet" href="style.css">
+  <title>WhatsApp Data Animated App</title>
+  <style>
+    /* ===== General ===== */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+
+    .app {
+      width: 100%;
+      padding: 15px;
+      min-height: 100vh;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 16px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #playBtn { background: #28a745; color: white; }
+    #historyBtn { background: #007bff; color: white; }
+    .delete-btn { background: #e53935; color: white; }
+
+    .animation-box { min-height: 150px; margin: 10px 0; padding: 10px 0; }
+    .history-box { margin-top: 10px; }
+
+    /* ===== Item Boxes ===== */
+    .item-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      position: relative;
+    }
+
+    .item-data {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .item-data span { margin: 2px 0; font-size: 16px; }
+    .up { color: green; font-weight: bold; }
+    .down { color: red; font-weight: bold; }
+
+    /* ===== 3-dot menu ===== */
+    .menu { position: relative; }
+    .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 10px;
+      user-select: none;
+    }
+
+    .menu-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 28px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      min-width: 120px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .menu-content button {
+      width: 100%;
+      padding: 8px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .menu-content button:hover { background: #f2f2f2; }
+
+    /* ===== Animation ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-row { animation: fadeInUp 0.6s ease forwards; }
+  </style>
 </head>
 <body>
 
 <div class="app">
+  <h2>WhatsApp Data → Animated App</h2>
 
-  <h2>WhatsApp Data → Animated Video</h2>
-
-  <!-- Input Section -->
   <textarea id="input" placeholder="Paste data here: Item,Old,New
 Rice,50,55
 Sugar,40,38"></textarea>
   <button id="playBtn">▶ Play</button>
-
-  <!-- Animation Display -->
   <div id="animation" class="animation-box"></div>
-
-  <!-- View History -->
   <button id="historyBtn">📜 View History</button>
-
-  <!-- History Section -->
   <div id="history" class="history-box"></div>
-
 </div>
 
-<script src="script.js"></script>
+<script>
+  const playBtn = document.getElementById("playBtn");
+  const historyBtn = document.getElementById("historyBtn");
+  const animationBox = document.getElementById("animation");
+  const historyDiv = document.getElementById("history");
+
+  playBtn.addEventListener("click", () => {
+    const text = document.getElementById("input").value.trim();
+    if (!text) return alert("Please paste data first.");
+    saveToHistory(text);
+    playAnimation(text);
+  });
+
+  historyBtn.addEventListener("click", showHistory);
+
+  function playAnimation(text) {
+    animationBox.innerHTML = "";
+    const lines = text.split("\n");
+    lines.forEach((line, index) => {
+      setTimeout(() => {
+        const parts = line.split(",");
+        if(parts.length === 3){
+          const item = parts[0].trim();
+          const oldVal = Number(parts[1]);
+          const newVal = Number(parts[2]);
+          let status="➖", cls="";
+          if(newVal>oldVal){ status="🔼 Increase"; cls="up"; }
+          else if(newVal<oldVal){ status="🔽 Decrease"; cls="down"; }
+
+          const div = document.createElement("div");
+          div.className="item-box animate-row";
+          div.innerHTML = `
+            <div class="item-data">
+              <span><b>Item:</b> ${item}</span>
+              <span><b>Old:</b> ${oldVal}</span>
+              <span><b>New:</b> ${newVal}</span>
+              <span class="${cls}"><b>Status:</b> ${status}</span>
+            </div>
+            <div class="menu">
+              <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+              <div class="menu-content">
+                <button onclick="deleteEntry('${item}')">Delete</button>
+                <button onclick="deleteAllHistory()">Delete All History</button>
+              </div>
+            </div>
+          `;
+          animationBox.appendChild(div);
+        }
+      }, index*800);
+    });
+  }
+
+  function toggleMenu(element){
+    const menu = element.nextElementSibling;
+    menu.style.display = (menu.style.display==="block")?"none":"block";
+  }
+
+  function saveToHistory(text){
+    const today = new Date().toLocaleDateString();
+    let history = JSON.parse(localStorage.getItem("history"))||[];
+    history.push({date:today, data:text});
+    localStorage.setItem("history", JSON.stringify(history));
+  }
+
+  function showHistory(){
+    let history = JSON.parse(localStorage.getItem("history"))||[];
+    historyDiv.innerHTML="";
+    if(history.length===0){ historyDiv.innerHTML="<p>No history found.</p>"; return;}
+    historyDiv.innerHTML="<h3>📅 Daily History</h3>";
+    history.slice().reverse().forEach((entry,index)=>{
+      historyDiv.innerHTML += `
+        <div class="item-box">
+          <div class="item-data">
+            <span><b>Date:</b> ${entry.date}</span>
+            <pre>${entry.data}</pre>
+          </div>
+          <div class="menu">
+            <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+            <div class="menu-content">
+              <button onclick="deleteHistoryEntry(${history.length-1-index})">Delete</button>
+              <button onclick="deleteAllHistory()">Delete All History</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function deleteHistoryEntry(index){
+    let history = JSON.parse(localStorage.getItem("history"))||[];
+    history.splice(index,1);
+    localStorage.setItem("history", JSON.stringify(history));
+    showHistory();
+  }
+
+  function deleteAllHistory(){
+    if(confirm("Delete all history? This cannot be undone.")){
+      localStorage.removeItem("history");
+      historyDiv.innerHTML="<p>All history deleted.</p>";
+      animationBox.innerHTML="";
+    }
+  }
+
+  function deleteEntry(itemName){
+    const boxes = animationBox.getElementsByClassName("item-box");
+    for(let box of boxes){
+      if(box.querySelector(".item-data span").textContent.includes(itemName)){
+        box.remove(); break;
+      }
+    }
+  }
+</script>
+
 </body>
 </html>
