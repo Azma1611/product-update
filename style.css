@@ -1,15 +1,19 @@
+// PLAY VIDEO-LIKE ANIMATION
 function playVideo() {
   const text = document.getElementById("input").value.trim();
-  const lines = text.split("\n");
-  const tbody = document.getElementById("result");
+  if (!text) return;
 
-  tbody.innerHTML = "";
+  saveToHistory(text);
+
+  const lines = text.split("\n");
+  const animationBox = document.getElementById("animation");
+  animationBox.innerHTML = "";
 
   lines.forEach((line, index) => {
     setTimeout(() => {
       const parts = line.split(",");
       if (parts.length === 3) {
-        const item = parts[0];
+        const item = parts[0].trim();
         const oldVal = Number(parts[1]);
         const newVal = Number(parts[2]);
 
@@ -24,71 +28,88 @@ function playVideo() {
           cls = "down";
         }
 
-        const row = document.createElement("tr");
-        row.className = "row";
-        row.innerHTML = `
-          <td>${item}</td>
-          <td>${oldVal}</td>
-          <td>${newVal}</td>
-          <td class="${cls}">${status}</td>
+        const div = document.createElement("div");
+        div.className = "item-box animate-row";
+        div.innerHTML = `
+          <div class="item-data">
+            <span><b>Item:</b> ${item}</span>
+            <span><b>Old:</b> ${oldVal}</span>
+            <span><b>New:</b> ${newVal}</span>
+            <span class="${cls}"><b>Status:</b> ${status}</span>
+          </div>
+          <div class="menu">
+            <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+            <div class="menu-content">
+              <button onclick="deleteEntry('${item}')">Delete</button>
+              <button onclick="deleteAllHistory()">Delete All History</button>
+            </div>
+          </div>
         `;
-        tbody.appendChild(row);
+        animationBox.appendChild(div);
       }
     }, index * 800);
   });
+}
 
-  // Save daily data
+// Toggle menu
+function toggleMenu(element) {
+  const menu = element.nextElementSibling;
+  menu.style.display = (menu.style.display === "block") ? "none" : "block";
+}
+
+// SAVE DAILY DATA
 function saveToHistory(text) {
   const today = new Date().toLocaleDateString();
   let history = JSON.parse(localStorage.getItem("history")) || [];
 
-  history.push({
-    date: today,
-    data: text
-  });
-
+  history.push({ date: today, data: text });
   localStorage.setItem("history", JSON.stringify(history));
 }
 
-// Show history with per-entry delete
+// SHOW HISTORY
 function showHistory() {
   const historyDiv = document.getElementById("history");
   let history = JSON.parse(localStorage.getItem("history")) || [];
 
   if (history.length === 0) {
-    historyDiv.innerHTML = "<p>No history found</p>";
+    historyDiv.innerHTML = "<p>No history found.</p>";
   } else {
     historyDiv.innerHTML = "<h3>📅 Daily History</h3>";
 
-    // Reverse for latest first
     history.slice().reverse().forEach((entry, index) => {
       historyDiv.innerHTML += `
-        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; position:relative;">
-          <b>${entry.date}</b>
-          <pre>${entry.data}</pre>
-          <button class="delete-entry-btn" onclick="deleteEntry(${history.length - 1 - index})">Delete</button>
+        <div class="item-box">
+          <div class="item-data">
+            <span><b>Date:</b> ${entry.date}</span>
+            <pre>${entry.data}</pre>
+          </div>
+          <div class="menu">
+            <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+            <div class="menu-content">
+              <button onclick="deleteHistoryEntry(${history.length - 1 - index})">Delete</button>
+              <button onclick="deleteAllHistory()">Delete All History</button>
+            </div>
+          </div>
         </div>
       `;
     });
   }
-
   historyDiv.style.display = "block";
 }
 
-// Delete single entry
-function deleteEntry(index) {
+// DELETE SINGLE HISTORY ENTRY
+function deleteHistoryEntry(index) {
   let history = JSON.parse(localStorage.getItem("history")) || [];
   history.splice(index, 1);
   localStorage.setItem("history", JSON.stringify(history));
-  showHistory(); // refresh
+  showHistory();
 }
 
-// Delete all history
+// DELETE ALL HISTORY
 function deleteAllHistory() {
   if (confirm("Delete all history? This cannot be undone.")) {
     localStorage.removeItem("history");
     document.getElementById("history").innerHTML = "<p>All history deleted.</p>";
+    document.getElementById("animation").innerHTML = "";
   }
 }
-      }
-
