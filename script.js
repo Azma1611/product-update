@@ -1,137 +1,140 @@
-// ELEMENTS
 const playBtn = document.getElementById("playBtn");
 const historyBtn = document.getElementById("historyBtn");
 const animationBox = document.getElementById("animation");
 const historyDiv = document.getElementById("history");
 
-// PLAY BUTTON CLICK
-playBtn.addEventListener("click", () => {
-  const text = document.getElementById("input").value.trim();
-  if (!text) return alert("Please paste data first.");
-
-  saveToHistory(text);
-  playAnimation(text);
-});
-
-// VIEW HISTORY BUTTON CLICK
-historyBtn.addEventListener("click", showHistory);
-
-// ANIMATION FUNCTION
-function playAnimation(text) {
-  animationBox.innerHTML = "";
-  const lines = text.split("\n");
-
-  lines.forEach((line, index) => {
-    setTimeout(() => {
-      const parts = line.split(",");
-      if (parts.length === 3) {
-        const item = parts[0].trim();
-        const oldVal = Number(parts[1]);
-        const newVal = Number(parts[2]);
-
-        let status = "➖";
-        let cls = "";
-
-        if (newVal > oldVal) {
-          status = "🔼 Increase";
-          cls = "up";
-        } else if (newVal < oldVal) {
-          status = "🔽 Decrease";
-          cls = "down";
-        }
-
-        const div = document.createElement("div");
-        div.className = "item-box animate-row";
-        div.innerHTML = `
-          <div class="item-data">
-            <span><b>Item:</b> ${item}</span>
-            <span><b>Old:</b> ${oldVal}</span>
-            <span><b>New:</b> ${newVal}</span>
-            <span class="${cls}"><b>Status:</b> ${status}</span>
-          </div>
-          <div class="menu">
-            <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
-            <div class="menu-content">
-              <button onclick="deleteEntry('${item}')">Delete</button>
-              <button onclick="deleteAllHistory()">Delete All History</button>
-            </div>
-          </div>
-        `;
-        animationBox.appendChild(div);
+// Parse pasted WhatsApp data
+function parseData(text){
+  let lines = text.split(/\n/).map(l=>l.trim()).filter(l=>l);
+  let data = [], market="", date="";
+  lines.forEach(line=>{
+    if(line.match(/^\d{2}[._]\d{2}[._]?\d{4}$/)){date=line;} // date line
+    else if(!line.includes(":")){market=line;} // market line
+    else{
+      let parts=line.split(":");
+      let item=parts[0].trim();
+      let prices=parts[1].split("-").map(p=>Number(p.replace(/\D/g,"")));
+      if(prices.length===2){
+        data.push({market,date,item,old:prices[0],new:prices[1]});
       }
-    }, index * 800);
+    }
   });
+  return data;
 }
 
-// MENU TOGGLE
-function toggleMenu(element) {
-  const menu = element.nextElementSibling;
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-
-// SAVE TO LOCALSTORAGE
-function saveToHistory(text) {
-  const today = new Date().toLocaleDateString();
-  let history = JSON.parse(localStorage.getItem("history")) || [];
-  history.push({ date: today, data: text });
-  localStorage.setItem("history", JSON.stringify(history));
-}
-
-// SHOW HISTORY
-function showHistory() {
-  let history = JSON.parse(localStorage.getItem("history")) || [];
-  historyDiv.innerHTML = "";
-
-  if (history.length === 0) {
-    historyDiv.innerHTML = "<p>No history found.</p>";
-    return;
-  }
-
-  historyDiv.innerHTML = "<h3>📅 Daily History</h3>";
-
-  history.slice().reverse().forEach((entry, index) => {
-    historyDiv.innerHTML += `
-      <div class="item-box">
+// Display animated items
+function displayAnimation(data){
+  animationBox.innerHTML = "";
+  data.forEach((entry,index)=>{
+    setTimeout(()=>{
+      let status="➖", cls="";
+      if(entry.new > entry.old){status="🔼 Increase"; cls="up";}
+      else if(entry.new < entry.old){status="🔽 Decrease"; cls="down";}
+      const div = document.createElement("div");
+      div.className="item-box animate-row";
+      div.innerHTML = `
         <div class="item-data">
+          <span><b>Market:</b> ${entry.market}</span>
           <span><b>Date:</b> ${entry.date}</span>
-          <pre>${entry.data}</pre>
+          <span><b>Item:</b> ${entry.item}</span>
+          <span><b>Old:</b> ${entry.old}</span>
+          <span><b>New:</b> ${entry.new}</span>
+          <span class="${cls}"><b>Status:</b> ${status}</span>
         </div>
         <div class="menu">
           <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
           <div class="menu-content">
-            <button onclick="deleteHistoryEntry(${history.length - 1 - index})">Delete</button>
+            <button onclick="deleteEntry('${entry.market}','${entry.item}','${entry.date}')">Delete</button>
             <button onclick="deleteAllHistory()">Delete All History</button>
           </div>
         </div>
-      </div>
-    `;
+      `;
+      animationBox.appendChild(div);
+    }, index*700);
   });
 }
 
-// DELETE SINGLE HISTORY ENTRY
-function deleteHistoryEntry(index) {
-  let history = JSON.parse(localStorage.getItem("history")) || [];
-  history.splice(index, 1);
+// Menu toggle
+function toggleMenu(elem){
+  const menu = elem.nextElementSibling;
+  menu.style.display = (menu.style.display==="block")?"none":"block";
+}
+
+// Delete item
+function deleteEntry(market,item,date){
+  const boxes = animationBox.getElementsByClassName("item-box");
+  for(let box of boxes){
+    let spans = box.querySelectorAll(".item-data span");
+    if(spans[0].textContent.includes(market) &&
+       spans[2].textContent.includes(item) &&
+       spans[1].textContent.includes(date)){box.remove(); break;}
+  }
+}
+
+// History
+function saveHistory(data){
+  let history = JSON.parse(localStorage.getItem("history"))||[];
+  history.push(data);
   localStorage.setItem("history", JSON.stringify(history));
+}
+
+function showHistory(){
+  let history = JSON.parse(localStorage.getItem("history"))||[];
+  historyDiv.innerHTML = "";
+  if(history.length===0){historyDiv.innerHTML="<p>No history found.</p>"; return;}
+  historyDiv.innerHTML="<h3>📅 Daily History</h3>";
+  history.slice().reverse().forEach((arr,idx)=>{
+    arr.forEach(entry=>{
+      const div=document.createElement("div");
+      div.className="item-box";
+      div.innerHTML = `
+        <div class="item-data">
+          <span><b>Market:</b> ${entry.market}</span>
+          <span><b>Date:</b> ${entry.date}</span>
+          <span><b>Item:</b> ${entry.item}</span>
+          <span><b>Old:</b> ${entry.old}</span>
+          <span><b>New:</b> ${entry.new}</span>
+        </div>
+        <div class="menu">
+          <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+          <div class="menu-content">
+            <button onclick="deleteHistoryEntry(${history.length-1-idx})">Delete</button>
+            <button onclick="deleteAllHistory()">Delete All History</button>
+          </div>
+        </div>
+      `;
+      historyDiv.appendChild(div);
+    });
+  });
+}
+
+// Delete history entry
+function deleteHistoryEntry(idx){
+  let history = JSON.parse(localStorage.getItem("history"))||[];
+  history.splice(idx,1);
+  localStorage.setItem("history",JSON.stringify(history));
   showHistory();
 }
 
-// DELETE ALL HISTORY
-function deleteAllHistory() {
-  if (confirm("Delete all history? This cannot be undone.")) {
+// Delete all history
+function deleteAllHistory(){
+  if(confirm("Delete all history?")){
     localStorage.removeItem("history");
-    historyDiv.innerHTML = "<p>All history deleted.</p>";
-    animationBox.innerHTML = "";
+    historyDiv.innerHTML="<p>All history deleted.</p>";
+    animationBox.innerHTML="";
   }
 }
 
-// DELETE ENTRY FROM ANIMATION
-function deleteEntry(itemName) {
-  const boxes = animationBox.getElementsByClassName("item-box");
-  for (let box of boxes) {
-    if (box.querySelector(".item-data span").textContent.includes(itemName)) {
-      box.remove();
-      break;
-    }
-  }
-}
+// Play button
+playBtn.addEventListener("click",()=>{
+  const text = document.getElementById("input").value.trim();
+  if(!text){alert("Paste WhatsApp data!"); return;}
+  let parsed = parseData(text);
+  if(parsed.length>0){
+    displayAnimation(parsed);
+    saveHistory(parsed);
+  } else { alert("No valid data found!"); }
+});
+
+// History button
+historyBtn.addEventListener("click", showHistory);
