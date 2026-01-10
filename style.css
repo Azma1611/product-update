@@ -1,175 +1,23 @@
-/* ===== Body & App Container ===== */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-}
-
-.app {
-  width: 100%;
-  max-width: 480px;  /* Mobile-friendly width */
-  margin: 0 auto;
-  padding: 15px;
-  min-height: 100vh;
-  background: #fff;
-  box-sizing: border-box;
-}
-
-/* ===== Headings ===== */
-h2 {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 20px;
-  color: #333;
-}
-
-/* ===== Textarea ===== */
-textarea {
-  width: 100%;
-  height: 100px;
-  font-size: 16px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  resize: none;
-  box-sizing: border-box;
-}
-
-/* ===== Buttons ===== */
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-#playBtn {
-  background-color: #28a745;
-  color: white;
-}
-
-#historyBtn {
-  background-color: #007bff;
-  color: white;
-}
-
-.delete-btn {
-  background-color: #e53935;
-  color: white;
-}
-
-/* ===== Animation Box ===== */
-.animation-box {
-  min-height: 150px;
-  margin: 10px 0;
-  padding: 5px 0;
-}
-
-/* ===== History Box ===== */
-.history-box {
-  margin-top: 10px;
-}
-
-/* ===== Item Box ===== */
-.item-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-  position: relative;
-  transition: 0.2s;
-}
-
-.item-box:hover {
-  transform: translateY(-2px);
-}
-
-/* ===== Item Data ===== */
-.item-data {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.item-data span {
-  margin: 2px 0;
-  font-size: 16px;
-  color: #333;
-}
-
-/* ===== Status Colors ===== */
-.up {
-  color: green;
-  font-weight: bold;
-}
-
-.down {
-  color: red;
-  font-weight: bold;
-}
-
-/* ===== 3-dot Menu ===== */
-.menu {
-  position: relative;
-}
-
-.menu-btn {
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0 10px;
-  user-select: none;
-}
-
-.menu-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 28px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  min-width: 130px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-  z-index: 10;
-}
-
-.menu-content button {
-  width: 100%;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  font-size: 15px;
-  color: #333;
-  transition: 0.2s;
-}
-
-.menu-content button:hover {
-  background-color: #f2f2f2;
-}
-
-/* ===== Animation ===== */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-row {
-  animation: fadeInUp 0.6s ease forwards;
-}
+body {margin:0; font-family:Arial,sans-serif; background:#f2f2f2;}
+.app {width:100%; max-width:480px; margin:0 auto; padding:15px; min-height:100vh; background:#fff; box-sizing:border-box;}
+h2 {text-align:center; margin-bottom:15px;}
+textarea {width:100%; height:150px; font-size:16px; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ccc; resize:none; box-sizing:border-box;}
+button {width:100%; padding:14px; font-size:16px; border:none; border-radius:10px; margin-bottom:10px; cursor:pointer; transition:0.2s;}
+button:active {transform:scale(0.97);}
+#playBtn{background:#28a745;color:#fff;}
+#historyBtn{background:#007bff;color:#fff;}
+.animation-box{min-height:150px;margin:10px 0;padding:5px 0;}
+.history-box{margin-top:10px;}
+.item-box{display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; width:100%; box-sizing:border-box; box-shadow:0 3px 8px rgba(0,0,0,0.15); position:relative; transition:0.2s;}
+.item-box:hover{transform:translateY(-2px);}
+.item-data{display:flex; flex-direction:column; flex:1;}
+.item-data span{margin:2px 0; font-size:16px; color:#333;}
+.up{color:green; font-weight:bold;}
+.down{color:red; font-weight:bold;}
+.menu{position:relative;}
+.menu-btn{font-size:24px; cursor:pointer; padding:0 10px; user-select:none;}
+.menu-content{display:none; position:absolute; right:0; top:28px; background:#fff; border:1px solid #ccc; border-radius:8px; min-width:130px; box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:10;}
+.menu-content button{width:100%; padding:10px 12px; background:none; border:none; text-align:left; cursor:pointer; font-size:15px; color:#333; transition:0.2s;}
+.menu-content button:hover{background:#f2f2f2;}
+@keyframes fadeInUp{from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);}}
+.animate-row{animation:fadeInUp 0.6s ease forwards;}
