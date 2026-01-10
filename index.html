@@ -5,41 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turmeric Market Tracker</title>
 <style>
-body {
-  margin:0; font-family: Arial, sans-serif; background:#f2f2f2;
-}
-.app {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 15px;
-  min-height: 100vh;
-  background: #fff;
-  box-sizing: border-box;
-}
+body {margin:0; font-family:Arial,sans-serif; background:#f2f2f2;}
+.app {width:100%; max-width:480px; margin:0 auto; padding:15px; min-height:100vh; background:#fff; box-sizing:border-box;}
 h2 {text-align:center; margin-bottom:15px;}
-textarea {
-  width:100%; height:120px; font-size:16px; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ccc; resize:none; box-sizing:border-box;
-}
-button {
-  width:100%; padding:14px; font-size:16px; border:none; border-radius:10px; margin-bottom:10px; cursor:pointer; transition:0.2s;
-}
-button:active { transform:scale(0.97); }
+textarea {width:100%; height:150px; font-size:16px; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ccc; resize:none; box-sizing:border-box;}
+button {width:100%; padding:14px; font-size:16px; border:none; border-radius:10px; margin-bottom:10px; cursor:pointer; transition:0.2s;}
+button:active {transform:scale(0.97);}
 #playBtn{background:#28a745;color:#fff;}
 #historyBtn{background:#007bff;color:#fff;}
 .animation-box{min-height:150px;margin:10px 0;padding:5px 0;}
 .history-box{margin-top:10px;}
-.item-box{
-  display:flex; justify-content:space-between; align-items:center;
-  background:#fff; border-radius:12px; padding:16px; margin-bottom:12px;
-  width:100%; box-sizing:border-box; box-shadow:0 3px 8px rgba(0,0,0,0.15); position:relative;
-  transition:0.2s;
-}
+.item-box{display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; width:100%; box-sizing:border-box; box-shadow:0 3px 8px rgba(0,0,0,0.15); position:relative; transition:0.2s;}
 .item-box:hover{transform:translateY(-2px);}
 .item-data{display:flex; flex-direction:column; flex:1;}
 .item-data span{margin:2px 0; font-size:16px; color:#333;}
-.up{color:green;font-weight:bold;}
-.down{color:red;font-weight:bold;}
+.up{color:green; font-weight:bold;}
+.down{color:red; font-weight:bold;}
 .menu{position:relative;}
 .menu-btn{font-size:24px; cursor:pointer; padding:0 10px; user-select:none;}
 .menu-content{display:none; position:absolute; right:0; top:28px; background:#fff; border:1px solid #ccc; border-radius:8px; min-width:130px; box-shadow:0 3px 6px rgba(0,0,0,0.2); z-index:10;}
@@ -52,30 +33,40 @@ button:active { transform:scale(0.97); }
 <body>
 <div class="app">
 <h2>Turmeric Market Tracker</h2>
-<textarea id="input" placeholder="Paste new data here"></textarea>
+<textarea id="input" placeholder="Paste WhatsApp data here"></textarea>
 <button id="playBtn">▶ Play</button>
 <button id="historyBtn">📜 View History</button>
 <div id="animation" class="animation-box"></div>
 <div id="history" class="history-box"></div>
 </div>
+
 <script>
 const playBtn=document.getElementById("playBtn");
 const historyBtn=document.getElementById("historyBtn");
 const animationBox=document.getElementById("animation");
 const historyDiv=document.getElementById("history");
 
-// Example initial data (your WhatsApp data)
-const initialData=[
-  {market:"PERUNDURAI REGULATED MARKET", date:"08_01_2026", item:"Finger", old:9569, new:16089},
-  {market:"PERUNDURAI REGULATED MARKET", date:"08_01_2026", item:"Bulb", old:8569, new:14499},
-  {market:"ERODE REGULATED MARKET", date:"08.01.2026", item:"Finger", old:8999, new:16369},
-  {market:"ERODE REGULATED MARKET", date:"08.01.2026", item:"Bulb", old:8469, new:14599},
-  {market:"ERODE SOCIETY", date:"08.01.2026", item:"Finger", old:9999, new:16099},
-  {market:"ERODE SOCIETY", date:"08.01.2026", item:"Bulb", old:9499, new:14479}
-];
+// Parse pasted WhatsApp data into structured array
+function parseData(text){
+  let lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l);
+  let data=[], market="", date="";
+  lines.forEach(line=>{
+    if(line.match(/^\d{2}[._]\d{2}[._]?\d{4}$/)){date=line;} // date line
+    else if(!line.includes(":")){market=line;} // market line
+    else{
+      let parts=line.split(":");
+      let item=parts[0].trim();
+      let prices=parts[1].split("-").map(p=>Number(p.replace(/\D/g,"")));
+      if(prices.length===2){
+        data.push({market,date,item,old:prices[0],new:prices[1]});
+      }
+    }
+  });
+  return data;
+}
 
-// Play animation using array of items
-function playAnimationData(data){
+// Display animated items
+function displayAnimation(data){
   animationBox.innerHTML="";
   data.forEach((entry,index)=>{
     setTimeout(()=>{
@@ -85,58 +76,56 @@ function playAnimationData(data){
       const div=document.createElement("div");
       div.className="item-box animate-row";
       div.innerHTML=`
-      <div class="item-data">
-        <span><b>Market:</b> ${entry.market}</span>
-        <span><b>Date:</b> ${entry.date}</span>
-        <span><b>Item:</b> ${entry.item}</span>
-        <span><b>Old:</b> ${entry.old}</span>
-        <span><b>New:</b> ${entry.new}</span>
-        <span class="${cls}"><b>Status:</b> ${status}</span>
-      </div>
-      <div class="menu">
-        <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
-        <div class="menu-content">
-          <button onclick="deleteEntry('${entry.market}','${entry.item}')">Delete</button>
-          <button onclick="deleteAllHistory()">Delete All History</button>
+        <div class="item-data">
+          <span><b>Market:</b> ${entry.market}</span>
+          <span><b>Date:</b> ${entry.date}</span>
+          <span><b>Item:</b> ${entry.item}</span>
+          <span><b>Old:</b> ${entry.old}</span>
+          <span><b>New:</b> ${entry.new}</span>
+          <span class="${cls}"><b>Status:</b> ${status}</span>
         </div>
-      </div>
+        <div class="menu">
+          <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
+          <div class="menu-content">
+            <button onclick="deleteEntry('${entry.market}','${entry.item}','${entry.date}')">Delete</button>
+            <button onclick="deleteAllHistory()">Delete All History</button>
+          </div>
+        </div>
       `;
       animationBox.appendChild(div);
-    },index*800);
+    },index*700);
   });
 }
 
-// MENU
-function toggleMenu(element){
-  const menu=element.nextElementSibling;
-  menu.style.display=(menu.style.display==="block")?"none":"block";
-}
+// Menu toggle
+function toggleMenu(elem){const menu=elem.nextElementSibling; menu.style.display=(menu.style.display==="block")?"none":"block";}
 
-// DELETE ENTRY
-function deleteEntry(market,item){
+// Delete item from animation
+function deleteEntry(market,item,date){
   const boxes=animationBox.getElementsByClassName("item-box");
   for(let box of boxes){
-    if(box.querySelector(".item-data span").textContent.includes(market) &&
-       box.querySelector(".item-data span:nth-child(3)").textContent.includes(item)){
-      box.remove(); break;
-    }
+    let spans=box.querySelectorAll(".item-data span");
+    if(spans[0].textContent.includes(market) &&
+       spans[2].textContent.includes(item) &&
+       spans[1].textContent.includes(date)){box.remove(); break;}
   }
 }
 
-// HISTORY
-function saveToHistory(data){
+// History storage
+function saveHistory(data){
   let history=JSON.parse(localStorage.getItem("history"))||[];
   history.push(data);
   localStorage.setItem("history",JSON.stringify(history));
 }
 
+// Show history
 function showHistory(){
   let history=JSON.parse(localStorage.getItem("history"))||[];
   historyDiv.innerHTML="";
   if(history.length===0){historyDiv.innerHTML="<p>No history found.</p>"; return;}
   historyDiv.innerHTML="<h3>📅 Daily History</h3>";
-  history.slice().reverse().forEach((arr,index)=>{
-    arr.forEach((entry)=>{
+  history.slice().reverse().forEach((arr,idx)=>{
+    arr.forEach(entry=>{
       const div=document.createElement("div");
       div.className="item-box";
       div.innerHTML=`
@@ -150,7 +139,7 @@ function showHistory(){
         <div class="menu">
           <span class="menu-btn" onclick="toggleMenu(this)">⋮</span>
           <div class="menu-content">
-            <button onclick="deleteHistoryEntry(${history.length-1-index})">Delete</button>
+            <button onclick="deleteHistoryEntry(${history.length-1-idx})">Delete</button>
             <button onclick="deleteAllHistory()">Delete All History</button>
           </div>
         </div>
@@ -160,44 +149,32 @@ function showHistory(){
   });
 }
 
-// DELETE HISTORY ENTRY
-function deleteHistoryEntry(index){
+// Delete history entry
+function deleteHistoryEntry(idx){
   let history=JSON.parse(localStorage.getItem("history"))||[];
-  history.splice(index,1);
+  history.splice(idx,1);
   localStorage.setItem("history",JSON.stringify(history));
   showHistory();
 }
 
-// DELETE ALL HISTORY
+// Delete all history
 function deleteAllHistory(){
-  if(confirm("Delete all history?")){localStorage.removeItem("history"); historyDiv.innerHTML="<p>All history deleted.</p>"; animationBox.innerHTML="";}
+  if(confirm("Delete all history?")){
+    localStorage.removeItem("history");
+    historyDiv.innerHTML="<p>All history deleted.</p>";
+    animationBox.innerHTML="";
+  }
 }
 
-// PLAY BUTTON CLICK
+// Play button
 playBtn.addEventListener("click",()=>{
   const text=document.getElementById("input").value.trim();
-  if(text===""){playAnimationData(initialData); return;}
-  // Parse pasted text as new data
-  let newData=[];
-  const lines=text.split("\n");
-  lines.forEach(line=>{
-    const parts=line.split(",");
-    if(parts.length===3){
-      let market="Unknown"; // optional
-      let date=new Date().toLocaleDateString();
-      newData.push({market,date,item:parts[0].trim(),old:Number(parts[1]),new:Number(parts[2])});
-    }
-  });
-  if(newData.length>0){
-    playAnimationData(newData);
-    saveToHistory(newData);
-  }
+  if(!text){alert("Paste WhatsApp data!"); return;}
+  let parsed=parseData(text);
+  if(parsed.length>0){displayAnimation(parsed); saveHistory(parsed);}
 });
 
 historyBtn.addEventListener("click",showHistory);
-
-// On page load, show initial data
-playAnimationData(initialData);
 </script>
 </body>
 </html>
