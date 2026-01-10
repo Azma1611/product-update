@@ -1,29 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Animated Price Comparison</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Comparison</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>WhatsApp Data → Animated Video</h2>
+<div class="app">
 
-<textarea id="input" placeholder="Item,Old,New"></textarea>
+  <h2>WhatsApp Data → Video</h2>
 
-<br>
-<button onclick="playVideo()">▶ Play Animation</button>
+  <textarea id="input" placeholder="Item,Old,New
+Rice,50,55
+Sugar,40,38"></textarea>
 
-<table>
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Old</th>
-      <th>New</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody id="result"></tbody>
-</table>
+  <button onclick="playVideo()">▶ Play Animation</button>
+
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Old</th>
+          <th>New</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="result"></tbody>
+    </table>
+  </div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
