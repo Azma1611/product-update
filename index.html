@@ -3,43 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Animated Comparison</title>
+  <title>Animated Comparison App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app">
 
-  <h2>WhatsApp Data → Video</h2>
+  <h2>WhatsApp Data → Animated Video</h2>
 
-  <textarea id="input" placeholder="Item,Old,New
+  <!-- Input Section -->
+  <textarea id="input" placeholder="Paste data here: Item,Old,New
 Rice,50,55
 Sugar,40,38"></textarea>
-
   <button onclick="playVideo()">▶ Play Animation</button>
 
-  <button onclick="showHistory()">📜 View History</button>
+  <!-- Animation Display -->
+  <div id="animation" class="animation-box"></div>
 
-<button onclick="deleteAllHistory()" class="delete-btn">🗑️ Delete All History</button>
+  <!-- View History -->
+  <button onclick="showHistory()" class="view-history-btn">📜 View History</button>
 
-<div id="history" style="display:none; margin-top:15px;"></div>
-
-
-<div id="history" style="display:none; margin-top:15px;"></div>
-  
-  <div class="table-box">
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Old</th>
-          <th>New</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="result"></tbody>
-    </table>
-  </div>
+  <!-- History Section -->
+  <div id="history" class="history-box"></div>
 
 </div>
 
