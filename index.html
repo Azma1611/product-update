@@ -3,17 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Turmeric Product Comparator</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-h1 { text-align:center; }
-textarea { width: 100%; height: 150px; font-family: monospace; font-size: 14px; padding: 10px; }
-button { padding: 10px 20px; margin: 10px 0; cursor:pointer; background:#ff6600; color:white; border:none; border-radius:5px; }
-.place-section { background:white; padding:15px; margin:20px 0; border-radius:10px; box-shadow:0 0 5px rgba(0,0,0,0.1); }
-.place-section h2 { margin-bottom:10px; }
-.price-line { margin-left:10px; }
-.arrow-up { color:green; font-weight:bold; }
-.arrow-down { color:red; font-weight:bold; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -24,90 +14,6 @@ button { padding: 10px 20px; margin: 10px 0; cursor:pointer; background:#ff6600;
 
 <div id="output"></div>
 
-<script>
-// Place names
-const places = [
-    "PERUNDURAI REGULATED MARKET",
-    "Erode Regulated Market",
-    "ERODE SOCIETY"
-];
-
-// Keys for LocalStorage
-const storageKeys = {
-    "PERUNDURAI REGULATED MARKET": "perundurai_data",
-    "Erode Regulated Market": "erode_market_data",
-    "ERODE SOCIETY": "erode_society_data"
-};
-
-// Process pasted data
-function processData() {
-    const rawData = document.getElementById("pasteData").value;
-    if(!rawData.trim()) { alert("Paste some data!"); return; }
-
-    // Separate by places
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = "";
-    places.forEach(place => {
-        // Find block for this place
-        let regex = new RegExp(place + "[\\s\\S]*?(?=" + places.filter(p=>p!==place).join("|") + "|$)", "i");
-        let match = rawData.match(regex);
-        if(match) {
-            let blockText = match[0].trim();
-            displayPlaceData(place, blockText);
-        }
-    });
-    document.getElementById("pasteData").value = "";
-}
-
-// Display data for one place
-function displayPlaceData(place, text) {
-    const outputDiv = document.getElementById("output");
-    let section = document.createElement("div");
-    section.className = "place-section";
-    let h2 = document.createElement("h2");
-    h2.innerText = place;
-    section.appendChild(h2);
-
-    // Split lines
-    let lines = text.split(/\r?\n/);
-    let oldData = JSON.parse(localStorage.getItem(storageKeys[place]) || "{}");
-    let newData = {};
-
-    lines.forEach(line=>{
-        let cleanLine = line.replace(/[*]/g,"").trim();
-        // Check for Finger/Bulb prices
-        let priceMatch = cleanLine.match(/(Finger|Bulb)\s*[:.]?\s*(\d+)\s*-\s*(\d+)/i);
-        if(priceMatch){
-            let type = priceMatch[1];
-            let minPrice = parseInt(priceMatch[2]);
-            let maxPrice = parseInt(priceMatch[3]);
-            let oldMax = oldData[type] || 0;
-            let arrow = "";
-            if(maxPrice > oldMax) arrow = " ↑"; 
-            else if(maxPrice < oldMax) arrow = " ↓"; 
-            else arrow = " —";
-            newData[type] = maxPrice;
-
-            let p = document.createElement("p");
-            p.className = "price-line";
-            p.innerHTML = `${type} : ${minPrice} – ${maxPrice} <span class="${arrow.includes("↑")?"arrow-up":arrow.includes("↓")?"arrow-down":""}">${arrow}</span>`;
-            section.appendChild(p);
-        } else {
-            // Other lines remain as-is
-            if(cleanLine) {
-                let p = document.createElement("p");
-                p.className = "price-line";
-                p.innerText = cleanLine;
-                section.appendChild(p);
-            }
-        }
-    });
-
-    // Save new max prices to LocalStorage
-    localStorage.setItem(storageKeys[place], JSON.stringify(newData));
-    outputDiv.appendChild(section);
-}
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
