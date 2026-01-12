@@ -1,14 +1,14 @@
 // Place names
 const places = [
     "PERUNDURAI REGULATED MARKET",
-    "Erode Regulated Market",
+    "ERODE REGULATED MARKET",
     "ERODE SOCIETY"
 ];
 
 // Keys for LocalStorage
 const storageKeys = {
     "PERUNDURAI REGULATED MARKET": "perundurai_data",
-    "Erode Regulated Market": "erode_market_data",
+    "ERODE REGULATED MARKET": "erode_market_data",
     "ERODE SOCIETY": "erode_society_data"
 };
 
