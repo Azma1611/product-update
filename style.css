@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+h1 { text-align:center; }
+textarea { width: 100%; height: 150px; font-family: monospace; font-size: 14px; padding: 10px; }
+button { padding: 10px 20px; margin: 10px 0; cursor:pointer; background:#ff6600; color:white; border:none; border-radius:5px; }
+.place-section { background:white; padding:15px; margin:20px 0; border-radius:10px; box-shadow:0 0 5px rgba(0,0,0,0.1); }
+.place-section h2 { margin-bottom:10px; }
+.price-line { margin-left:10px; }
+.arrow-up { color:green; font-weight:bold; }
+.arrow-down { color:red; font-weight:bold; }
