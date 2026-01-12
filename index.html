@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Product Data Comparator</title>
+<title>Turmeric Product Comparator</title>
 <style>
 body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
 h1 { text-align:center; }
@@ -21,7 +21,6 @@ button { padding: 10px 20px; margin: 10px 0; cursor:pointer; background:#ff6600;
 
 <textarea id="pasteData" placeholder="Paste your product data here..."></textarea>
 <button onclick="processData()">Save & Compare</button>
-<button onclick="downloadVideo()">Generate Demo Video</button>
 
 <div id="output"></div>
 
@@ -107,11 +106,6 @@ function displayPlaceData(place, text) {
     // Save new max prices to LocalStorage
     localStorage.setItem(storageKeys[place], JSON.stringify(newData));
     outputDiv.appendChild(section);
-}
-
-// Demo video generation using html2canvas and whammy.js (or similar libraries can be used)
-function downloadVideo(){
-    alert("Video generation will be implemented here using html2canvas / client-side recording library.\nFor now, the displayed output shows data with arrows clearly.");
 }
 </script>
 
