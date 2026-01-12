@@ -1,76 +1,76 @@
-// Place names
 const places = [
-    "PERUNDURAI REGULATED MARKET",
-    "ERODE REGULATED MARKET",
-    "ERODE SOCIETY"
+  "PERUNDURAI REGULATED MARKET",
+  "ERODE REGULATED MARKET",
+  "ERODE SOCIETY"
 ];
 
-// Keys for LocalStorage
-const storageKeys = {
-    "PERUNDURAI REGULATED MARKET": "perundurai_data",
-    "ERODE REGULATED MARKET": "erode_market_data",
-    "ERODE SOCIETY": "erode_society_data"
+const storeKey = {
+  "PERUNDURAI REGULATED MARKET": "p_data",
+  "ERODE REGULATED MARKET": "e_data",
+  "ERODE SOCIETY": "s_data"
 };
 
-// Process pasted data
-function processData() {
-    const rawData = document.getElementById("pasteData").value;
-    if(!rawData.trim()) { alert("Paste some data!"); return; }
+document.getElementById("btn").onclick = process;
 
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = "";
-    places.forEach(place => {
-        let regex = new RegExp(place + "[\\s\\S]*?(?=" + places.filter(p=>p!==place).join("|") + "|$)", "i");
-        let match = rawData.match(regex);
-        if(match) {
-            let blockText = match[0].trim();
-            displayPlaceData(place, blockText);
-        }
-    });
-    document.getElementById("pasteData").value = "";
+function process() {
+  const text = document.getElementById("pasteData").value;
+  if (!text.trim()) return alert("Paste data");
+
+  document.getElementById("output").innerHTML = "";
+
+  places.forEach(place => {
+    if (text.includes(place)) {
+      const block = extractBlock(text, place);
+      render(place, block);
+    }
+  });
+
+  document.getElementById("pasteData").value = "";
 }
 
-// Display data for one place
-function displayPlaceData(place, text) {
-    const outputDiv = document.getElementById("output");
-    let section = document.createElement("div");
-    section.className = "place-section";
-    let h2 = document.createElement("h2");
-    h2.innerText = place;
-    section.appendChild(h2);
+function extractBlock(text, place) {
+  const start = text.indexOf(place);
+  let end = text.length;
 
-    let lines = text.split(/\r?\n/);
-    let oldData = JSON.parse(localStorage.getItem(storageKeys[place]) || "{}");
-    let newData = {};
+  places.forEach(p => {
+    if (p !== place) {
+      const i = text.indexOf(p, start + 1);
+      if (i !== -1 && i < end) end = i;
+    }
+  });
 
-    lines.forEach(line=>{
-        let cleanLine = line.replace(/[*]/g,"").trim();
-        let priceMatch = cleanLine.match(/(Finger|Bulb)\s*[:.]?\s*(\d+)\s*-\s*(\d+)/i);
-        if(priceMatch){
-            let type = priceMatch[1];
-            let minPrice = parseInt(priceMatch[2]);
-            let maxPrice = parseInt(priceMatch[3]);
-            let oldMax = oldData[type] || 0;
-            let arrow = "";
-            if(maxPrice > oldMax) arrow = " ↑"; 
-            else if(maxPrice < oldMax) arrow = " ↓"; 
-            else arrow = " —";
-            newData[type] = maxPrice;
+  return text.substring(start, end).trim();
+}
 
-            let p = document.createElement("p");
-            p.className = "price-line";
-            p.innerHTML = `${type} : ${minPrice} – ${maxPrice} <span class="${arrow.includes("↑")?"arrow-up":arrow.includes("↓")?"arrow-down":""}">${arrow}</span>`;
-            section.appendChild(p);
-        } else {
-            if(cleanLine) {
-                let p = document.createElement("p");
-                p.className = "price-line";
-                p.innerText = cleanLine;
-                section.appendChild(p);
-            }
-        }
-    });
+function render(place, block) {
+  const div = document.createElement("div");
+  div.className = "place";
+  div.innerHTML = `<h3>${place}</h3>`;
 
-    localStorage.setItem(storageKeys[place], JSON.stringify(newData));
-    outputDiv.appendChild(section);
+  const old = JSON.parse(localStorage.getItem(storeKey[place]) || "{}");
+  const now = {};
+
+  block.split("\n").forEach(line => {
+    const clean = line.replace(/[*]/g, "").trim();
+
+    const m = clean.match(/(Finger|Bulb).*?(\d+)\s*-\s*(\d+)/i);
+    if (m) {
+      const type = m[1];
+      const max = Number(m[3]);
+      const prev = old[type] || 0;
+
+      let arrow = "—";
+      let cls = "";
+      if (max > prev) { arrow = "↑"; cls = "up"; }
+      else if (max < prev) { arrow = "↓"; cls = "down"; }
+
+      now[type] = max;
+      div.innerHTML += `<p>${clean} <span class="${cls}">${arrow}</span></p>`;
+    } else if (clean) {
+      div.innerHTML += `<p>${clean}</p>`;
+    }
+  });
+
+  localStorage.setItem(storeKey[place], JSON.stringify(now));
+  document.getElementById("output").appendChild(div);
 }
